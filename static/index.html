@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocCheck · Conferência de documentos</title>
+<style>
+:root{--bg:#0b1118;--surface:#121b26;--raised:#1a2735;--line:#263a4b;--text:#e6eef5;--muted:#8ba2b4;--brand:#6aa8ff;
+  --ok:#3ddc84;--crit:#ff5c7a;--high:#ff9a45;--med:#f2cd3b;--low:#5aa9ff;--info:#8ba2b4;
+  --sans:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;--mono:"Cascadia Mono",ui-monospace,Consolas,monospace}
+@media(prefers-color-scheme:light){:root{--bg:#eef3f7;--surface:#fff;--raised:#e8eff5;--line:#cdd9e3;--text:#102230;--muted:#5b7384;
+  --brand:#2a6fdb;--ok:#18a34a;--crit:#d6234a;--high:#d9700b;--med:#a88a00;--low:#2a6fdb;--info:#5b7384}}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 var(--sans)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;padding:9px 16px;border:1px solid var(--line);border-radius:9px;background:var(--raised)}
+button:hover{border-color:var(--brand)}button.primary{background:var(--brand);border-color:var(--brand);color:#06101c;font-weight:700}
+input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+header{padding:20px clamp(16px,4vw,48px);border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{width:40px;height:40px;border-radius:11px;background:var(--brand);display:grid;place-items:center;color:#06101c;font-weight:900;font-size:21px}
+header h1{margin:0;font-size:22px}header p{margin:0;color:var(--muted);font-size:13px}
+.privacy{margin-left:auto;font-size:12.5px;color:var(--ok);border:1px solid var(--ok);border-radius:999px;padding:3px 12px}
+main{max-width:1060px;margin:0 auto;padding:24px clamp(16px,4vw,48px) 70px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}.bar .grow{flex:1}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 12px;font-size:16px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}.hint{font-size:12px;margin-top:2px;min-height:16px}
+.hint.ok{color:var(--ok)}.hint.bad{color:var(--crit)}.file{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.file small{color:var(--muted)}.verdict{padding:18px;border:1px solid var(--line);border-left-width:6px;border-radius:12px;background:var(--surface);margin:8px 0 14px}
+.verdict b{font-size:20px}.verdict .sub{color:var(--muted);font-size:13px}
+.f{background:var(--surface);border:1px solid var(--line);border-left-width:4px;border-radius:10px;padding:12px 15px;margin:9px 0}
+.f .t{font-weight:600}.badge{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 9px;color:#07121b;margin-right:7px}
+.f .d{color:var(--muted);font-size:13.5px;margin-top:3px}.f .a{color:var(--ok);font-size:13px;margin-top:3px}.f .doc{float:right;color:var(--muted);font-size:12.5px}
+table{width:100%;border-collapse:collapse}td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{color:var(--muted);font-weight:500}
+code{font-family:var(--mono);font-size:12px}.note{color:var(--muted);font-size:12.5px;margin-top:18px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">D</div>
+  <div><h1>DocCheck</h1><p>Apoio à conferência de CNH e comprovantes</p></div>
+  <span class="privacy" title="Os dados são processados neste computador e não são gravados.">Roda local · nada é gravado</span>
+</header>
+<main>
+  <div class="bar">
+    <button id="exOk">Exemplo coerente</button>
+    <button id="exBad">Exemplo com problemas</button>
+    <span class="grow"></span>
+    <button id="clear">Limpar</button>
+    <button id="go" class="primary">Conferir documentos</button>
+  </div>
+  <p class="note" style="margin-top:0">Os exemplos são fictícios. Use só dados que você tem autorização para tratar (LGPD).</p>
+  <div id="form"></div>
+  <div id="result" hidden></div>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SEV={critical:'Crítico',high:'Alto',medium:'Médio',low:'Baixo',info:'Info'};
+const COLOR={critical:'var(--crit)',high:'var(--high)',medium:'var(--med)',low:'var(--low)',info:'var(--info)',ok:'var(--ok)'};
+const SECTIONS=[
+ {key:'proposta',title:'Proposta (dados informados pelo cliente)',fields:[
+  ['nome','Nome completo'],['cpf','CPF','cpf'],['data_nascimento','Nascimento (dd/mm/aaaa)'],['renda_declarada','Renda declarada (R$)'],
+  ['cep','CEP do endereço','cep'],['numero','Número do endereço']]},
+ {key:'cnh',title:'CNH',file:true,fields:[
+  ['nome','Nome na CNH'],['cpf','CPF','cpf'],['numero_registro','Número de registro','cnh'],['categoria','Categoria'],
+  ['data_nascimento','Nascimento'],['primeira_habilitacao','1ª habilitação'],['data_emissao','Emissão'],['validade','Validade']]},
+ {key:'comprovante_endereco',title:'Comprovante de endereço',file:true,fields:[
+  ['nome','Titular'],['tipo','Tipo (luz, água...)'],['data_emissao','Data de emissão'],['cep','CEP','cep'],
+  ['logradouro','Logradouro'],['numero','Número'],['uf','UF']]},
+ {key:'comprovante_renda',title:'Comprovante de renda (holerite)',file:true,fields:[
+  ['nome','Nome'],['cpf','CPF','cpf'],['competencia','Competência (mm/aaaa)'],['empregador','Empregador'],
+  ['cnpj_empregador','CNPJ do empregador','cnpj'],['bruto','Bruto (R$)'],['descontos','Descontos (R$)'],['liquido','Líquido (R$)']]}];
+const state={files:{},lastResult:null};
+
+function build(){
+  $('#form').innerHTML=SECTIONS.map(s=>`<section class="card"><h2>${esc(s.title)}</h2><div class="grid">`+
+    s.fields.map(([k,label,v])=>`<div><label for="${s.key}.${k}">${esc(label)}</label>
+      <input id="${s.key}.${k}" data-s="${s.key}" data-k="${k}" ${v?`data-v="${v}"`:''} autocomplete="off"><div class="hint" id="h.${s.key}.${k}"></div></div>`).join('')+
+    `</div>${s.file?`<div class="file"><label for="f.${s.key}">Arquivo do documento (PDF, JPG ou PNG) para a análise de metadados</label>
+      <input type="file" id="f.${s.key}" data-f="${s.key}" accept=".pdf,.jpg,.jpeg,.png"><small id="fn.${s.key}"></small></div>`:''}</section>`).join('');
+  document.querySelectorAll('input[data-v]').forEach(i=>i.addEventListener('input',debounce(()=>validate(i),300)));
+  document.querySelectorAll('input[data-f]').forEach(i=>i.addEventListener('change',()=>readFile(i)));
+}
+const debounce=(f,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>f(...a),ms)}};
+async function api(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);return d}
+async function validate(input){
+  const hint=document.getElementById('h.'+input.dataset.s+'.'+input.dataset.k),v=input.value.trim();
+  if(!v){hint.textContent='';hint.className='hint';return}
+  try{const r=await api('/api/validate',{[input.dataset.v]:v});const ok=r[input.dataset.v];
+    hint.textContent=ok?'dígitos verificadores corretos':'inválido';hint.className='hint '+(ok?'ok':'bad')}catch(e){}}
+function readFile(input){
+  const f=input.files[0],key=input.dataset.f,label=document.getElementById('fn.'+key);
+  if(!f){delete state.files[key];label.textContent='';return}
+  if(f.size>15*1024*1024){label.textContent=' arquivo maior que 15 MB';input.value='';return}
+  const r=new FileReader();
+  r.onload=()=>{state.files[key]={b64:String(r.result).split(',')[1],name:f.name};label.textContent=' '+f.name+' (lido só neste computador)'};
+  r.readAsDataURL(f);
+}
+function collect(){
+  const ficha={proposta:{endereco:{}},documentos:{}};
+  document.querySelectorAll('input[data-s]').forEach(i=>{
+    const v=i.value.trim();if(!v)return;
+    if(i.dataset.s==='proposta'){if(i.dataset.k==='cep'||i.dataset.k==='numero')ficha.proposta.endereco[i.dataset.k]=v;else ficha.proposta[i.dataset.k]=v}
+    else(ficha.documentos[i.dataset.s]??={})[i.dataset.k]=v});
+  for(const[k,f]of Object.entries(state.files)){if(ficha.documentos[k]){ficha.documentos[k].arquivo_b64=f.b64;ficha.documentos[k].arquivo_nome=f.name}}
+  return ficha;
+}
+function fill(ficha){
+  $('#clear').click();
+  const set=(s,k,v)=>{const i=document.getElementById(s+'.'+k);if(i&&v!=null){i.value=v;if(i.dataset.v)validate(i)}};
+  const p=ficha.proposta||{};Object.entries(p).forEach(([k,v])=>{if(k!=='endereco')set('proposta',k,v)});
+  Object.entries(p.endereco||{}).forEach(([k,v])=>set('proposta',k,v));
+  for(const[doc,d]of Object.entries(ficha.documentos||{})){
+    Object.entries(d).forEach(([k,v])=>{if(!k.startsWith('arquivo'))set(doc,k,v)});
+    if(d.arquivo_b64){state.files[doc]={b64:d.arquivo_b64,name:d.arquivo_nome};document.getElementById('fn.'+doc).textContent=' '+d.arquivo_nome+' (arquivo de exemplo)'}}
+}
+async function loadExample(name){
+  const all=await (await fetch('/api/samples')).json();fill(all[name]);run(all[name]);
+}
+async function run(ficha){
+  const box=$('#result');box.hidden=false;box.innerHTML='<div class="card">Conferindo...</div>';
+  try{const r=await api('/api/check',ficha||collect());state.lastResult=r;render(r)}
+  catch(e){box.innerHTML=`<div class="card" style="border-color:var(--crit)">${esc(e.message)}</div>`}
+}
+function render(r){
+  const col=COLOR[r.level]||'var(--info)',who=r.proponent||{};
+  const finds=r.findings.map(f=>`<div class="f" style="border-left-color:${COLOR[f.severity]}"><span class="doc">${esc(f.doc)}</span>
+    <div class="t"><span class="badge" style="background:${COLOR[f.severity]}">${esc(SEV[f.severity])}</span>${esc(f.title)}</div>
+    ${f.detail?`<div class="d">${esc(f.detail)}</div>`:''}${f.action?`<div class="a">Ação sugerida: ${esc(f.action)}</div>`:''}</div>`).join('')
+    ||'<p class="note">Nenhuma divergência encontrada nas regras verificadas.</p>';
+  const files=r.files.length?`<div class="card"><h2>Arquivos inspecionados</h2><table><tr><th>Documento</th><th>Arquivo</th><th>Tipo</th><th>Programa</th><th>SHA-256</th></tr>`+
+    r.files.map(f=>`<tr><td>${esc(f.doc)}</td><td><code>${esc(f.name)}</code></td><td>${esc(f.type)}</td><td>${esc(f.producer||'-')}</td><td><code>${esc(f.sha256)}</code></td></tr>`).join('')+`</table></div>`:'';
+  $('#result').innerHTML=`<div class="verdict" style="border-left-color:${col}"><b style="color:${col}">${esc(r.verdict)}</b>
+    <div class="sub">Nota de atenção ${r.risk}/100 · ${r.findings.length} ponto(s) · proponente ${esc(who.nome||'-')} · CPF ${esc(who.cpf||'-')}</div>
+    <div class="bar" style="margin:12px 0 0"><button id="copy">Copiar parecer</button><button id="dl">Baixar JSON</button></div></div>
+    ${finds}${files}<p class="note">${esc(r.note)}</p>`;
+  $('#copy').onclick=async()=>{await navigator.clipboard.writeText(text(r));$('#copy').textContent='Copiado!'};
+  $('#dl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(r,null,2)],{type:'application/json'}));a.download='parecer.json';a.click()};
+  $('#result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function text(r){
+  return ['PARECER DE CONFERÊNCIA',`${r.verdict} (nota ${r.risk}/100)`,'',...r.findings.flatMap(f=>[`[${SEV[f.severity]}] ${f.title} (${f.doc})`,f.detail?'  '+f.detail:'',f.action?'  -> '+f.action:''].filter(Boolean)),'',r.note].join('\n');
+}
+$('#go').onclick=()=>run();$('#exOk').onclick=()=>loadExample('coerente');$('#exBad').onclick=()=>loadExample('com_problemas');
+$('#clear').onclick=()=>{document.querySelectorAll('input').forEach(i=>{i.value=''});document.querySelectorAll('.hint').forEach(h=>{h.textContent='';h.className='hint'});
+  document.querySelectorAll('small[id^=fn]').forEach(s=>s.textContent='');state.files={};$('#result').hidden=true};
+build();
+</script>
+</body>
+</html>

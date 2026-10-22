@@ -1,0 +1,49 @@
+{
+  "data_referencia": "2026-10-21",
+  "proposta": {
+    "nome": "MARIA FERNANDA DE OLIVEIRA SOUZA",
+    "cpf": "39053344705",
+    "data_nascimento": "12/04/1991",
+    "renda_declarada": 8500.0,
+    "endereco": {
+      "cep": "04000-000",
+      "logradouro": "RUA EXEMPLO",
+      "numero": "120"
+    }
+  },
+  "documentos": {
+    "cnh": {
+      "nome": "MARIA FERNANDA DE OLIVEIRA SOUZA",
+      "cpf": "98765432100",
+      "numero_registro": "12345678901",
+      "categoria": "B",
+      "data_nascimento": "12/04/1991",
+      "primeira_habilitacao": "10/06/2010",
+      "data_emissao": "18/05/2016",
+      "validade": "15/03/2026"
+    },
+    "comprovante_endereco": {
+      "nome": "CARLOS EDUARDO PEREIRA",
+      "tipo": "conta de agua",
+      "data_emissao": "10/04/2026",
+      "cep": "01310-100",
+      "logradouro": "AV EXEMPLO",
+      "numero": "900",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "arquivo": "endereco_editado.jpg"
+    },
+    "comprovante_renda": {
+      "tipo": "holerite",
+      "nome": "MARIA FERNANDA DE OLIVEIRA SOUZA",
+      "cpf": "39053344705",
+      "competencia": "03/2026",
+      "empregador": "EMPRESA EXEMPLO LTDA",
+      "cnpj_empregador": "12.345.678/0001-00",
+      "bruto": "5.200,00",
+      "descontos": "1.148,00",
+      "liquido": "4.400,00",
+      "arquivo": "holerite_editado.pdf"
+    }
+  }
+}

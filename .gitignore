@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.vscode/
+.idea/
+
+# DADOS PESSOAIS: nunca versionar documentos, fichas ou pareceres reais
+# (os exemplos fictícios da pasta samples/ são a única exceção)
+*.pdf
+*.jpg
+*.jpeg
+*.png
+!samples/*.pdf
+!samples/*.jpg
+ficha*.json
+!samples/ficha_*.json
+parecer*.html
+parecer*.json

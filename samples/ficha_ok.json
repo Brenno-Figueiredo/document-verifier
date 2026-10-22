@@ -1,0 +1,49 @@
+{
+  "data_referencia": "2026-10-21",
+  "proposta": {
+    "nome": "MARIA FERNANDA DE OLIVEIRA SOUZA",
+    "cpf": "39053344705",
+    "data_nascimento": "12/04/1991",
+    "renda_declarada": 5200.0,
+    "endereco": {
+      "cep": "04000-000",
+      "logradouro": "RUA EXEMPLO",
+      "numero": "120"
+    }
+  },
+  "documentos": {
+    "cnh": {
+      "nome": "MARIA FERNANDA DE OLIVEIRA SOUZA",
+      "cpf": "39053344705",
+      "numero_registro": "12345678900",
+      "categoria": "B",
+      "data_nascimento": "12/04/1991",
+      "primeira_habilitacao": "10/06/2010",
+      "data_emissao": "18/05/2022",
+      "validade": "18/05/2032"
+    },
+    "comprovante_endereco": {
+      "nome": "MARIA FERNANDA DE OLIVEIRA SOUZA",
+      "tipo": "conta de energia",
+      "data_emissao": "28/09/2026",
+      "cep": "04000-000",
+      "logradouro": "RUA EXEMPLO",
+      "numero": "120",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "arquivo": "endereco_ok.pdf"
+    },
+    "comprovante_renda": {
+      "tipo": "holerite",
+      "nome": "MARIA FERNANDA DE OLIVEIRA SOUZA",
+      "cpf": "39053344705",
+      "competencia": "09/2026",
+      "empregador": "EMPRESA EXEMPLO LTDA",
+      "cnpj_empregador": "12345678000195",
+      "bruto": "5.200,00",
+      "descontos": "1.148,00",
+      "liquido": "4.052,00",
+      "arquivo": "holerite_ok.pdf"
+    }
+  }
+}
